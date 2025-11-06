@@ -1,5 +1,7 @@
 CREATE DATABASE appetitedb;
 
+\c appetitedb;
+
 -- Tabela: receitas
 CREATE TABLE receitas (
   id SERIAL PRIMARY KEY,
