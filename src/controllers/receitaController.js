@@ -1,60 +1,176 @@
-const FavoritosModel = require('../models/FavoritoModel');
+const ReceitaModel = require('../models/ReceitaModel');
 
-const getAllFavoritos = async (req, res) => {
+const validDificuldades = ['FÁCIL', 'MÉDIO', 'DIFÍCIL'];
+
+const getAllReceitas = async (req, res) => {
     try {
-        const favoritos = await FavoritosModel.getFavoritos();
-        res.json(favoritos);
+        const receitas = await ReceitaModel.getReceitas();
+        res.json(receitas);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar favoritos.' });
+        console.error('Erro ao buscar receitas:', error);
+        res.status(500).json({ error: 'Erro ao buscar receitas.' });
     }
 };
 
-const getFavoritoById = async (req, res) => {
+const getReceitasFavoritas = async (req, res) => {
     try {
-        const favorito = await FavoritosModel.getFavoritoById(req.params.id);
-        if (!favorito) {
-            return res.status(404).json({ error: 'Favorito não encontrado.' });
+        const receitas = await ReceitaModel.getReceitasFavoritas();
+        res.json(receitas);
+    } catch (error) {
+        console.error('Erro ao buscar receitas favoritas:', error);
+        res.status(500).json({ error: 'Erro ao buscar receitas favoritas.' });
+    }
+};
+
+const getReceitaById = async (req, res) => {
+    try {
+        const receita = await ReceitaModel.getReceitaById(req.params.id);
+        if (!receita) {
+            return res.status(404).json({ error: 'Receita não encontrada.' });
         }
-        res.json(favorito);
+        res.json(receita);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar favorito.' });
+        console.error('Erro ao buscar receita:', error);
+        res.status(500).json({ error: 'Erro ao buscar receita.' });
     }
 };
 
-const createFavorito = async (req, res) => {
+const deleteReceita = async (req, res) => {
     try {
-        const { personagem_id } = req.body; 
-        const favorito = await FavoritosModel.createFavorito(personagem_id);
-        res.status(201).json(favorito);
-    } catch (error) {
-        res.status(500).json({ message: "Erro ao criar favorito." });
-    }
-};
-
-const updateFavorito = async (req, res) => {
-    try {
-        const { personagem_id } = req.body; // removido usuario_id
-        const favorito = await FavoritosModel.updateFavorito(req.params.id, personagem_id);
-        if (!favorito) {
-            return res.status(404).json({ error: "Favorito não encontrado." });
+        const result = await ReceitaModel.deleteReceita(req.params.id);
+        if (!result) {
+            return res.status(404).json({ error: 'Receita não encontrada.' });
         }
-        res.status(200).json(favorito);
+        res.json({ message: 'Receita deletada com sucesso.' });
     } catch (error) {
-        res.status(500).json({ message: "Erro ao atualizar favorito." });
+        console.error('Erro ao deletar receita:', error);
+        res.status(500).json({ error: 'Erro ao deletar receita.' });
     }
 };
 
-const deleteFavorito = async (req, res) => {
+const updateReceita = async (req, res) => {
     try {
-        const result = await FavoritosModel.deleteFavorito(req.params.id);
-        if (result.error) {
-            return res.status(404).json(result);
+        const {
+            titulo,
+            descricao,
+            ingredientes,
+            modo_preparo,
+            imagem,
+            favorita,
+            avaliacao,
+            tempo_preparo,
+            dificuldade
+        } = req.body;
+
+        // Validações
+        if (dificuldade && !validDificuldades.includes(dificuldade)) {
+            return res.status(400).json({ 
+                error: `Dificuldade inválida. Valores válidos: ${validDificuldades.join(', ')}` 
+            });
         }
-        res.json(result);
+
+        let avaliacaoFinal = avaliacao;
+        if (avaliacao !== undefined) {
+            const av = parseInt(avaliacao, 10);
+            if (isNaN(av) || av < 1 || av > 5) {
+                return res.status(400).json({ 
+                    error: 'Avaliação deve ser inteiro entre 1 e 5.' 
+                });
+            }
+            avaliacaoFinal = av;
+        }
+
+        let tempoPreparoFinal = tempo_preparo;
+        if (tempo_preparo !== undefined) {
+            const tp = parseInt(tempo_preparo, 10);
+            tempoPreparoFinal = isNaN(tp) ? null : tp;
+        }
+
+        const favoritaFinal = favorita !== undefined ? !!favorita : favorita;
+
+        const receita = await ReceitaModel.updateReceita(
+            req.params.id,
+            titulo,
+            descricao,
+            ingredientes,
+            modo_preparo,
+            imagem,
+            favoritaFinal,
+            avaliacaoFinal,
+            tempoPreparoFinal,
+            dificuldade
+        );
+
+        if (!receita) {
+            return res.status(404).json({ error: 'Receita não encontrada.' });
+        }
+        res.json(receita);
     } catch (error) {
-        console.error('Erro ao deletar favorito:', error);
-        res.status(500).json({ error: 'Erro ao deletar favorito.' });
+        console.error('Erro ao atualizar receita:', error);
+        res.status(500).json({ error: 'Erro ao atualizar receita.' });
     }
 };
 
-module.exports = { getAllFavoritos, getFavoritoById, createFavorito, updateFavorito, deleteFavorito };
+const createReceita = async (req, res) => {
+    try {
+        const {
+            titulo,
+            descricao,
+            ingredientes,
+            modo_preparo,
+            imagem,
+            favorita = false,
+            avaliacao,
+            tempo_preparo,
+            dificuldade
+        } = req.body;
+
+        // Validação básica
+        if (!titulo || !dificuldade) {
+            return res.status(400).json({ 
+                error: 'Título e dificuldade são obrigatórios.' 
+            });
+        }
+
+        // Validação da dificuldade
+        if (!validDificuldades.includes(dificuldade)) {
+            return res.status(400).json({ 
+                error: `Dificuldade inválida. Valores válidos: ${validDificuldades.join(', ')}` 
+            });
+        }
+
+        // Validação da avaliação
+        let avaliacaoFinal = null;
+        if (avaliacao !== undefined) {
+            const av = parseInt(avaliacao, 10);
+            if (isNaN(av) || av < 1 || av > 5) {
+                return res.status(400).json({ 
+                    error: 'Avaliação deve ser inteiro entre 1 e 5.' 
+                });
+            }
+            avaliacaoFinal = av;
+        }
+
+        const tempoPreparoFinal = tempo_preparo !== undefined ? parseInt(tempo_preparo, 10) : null;
+
+        const novaReceita = {
+            titulo,
+            descricao,
+            ingredientes,
+            modo_preparo,
+            imagem,
+            favorita: !!favorita,
+            avaliacao: avaliacaoFinal,
+            tempo_preparo: tempoPreparoFinal,
+            dificuldade
+        };
+
+        const receita = await ReceitaModel.createReceita(novaReceita);
+        res.status(201).json(receita);
+    } catch (error) {
+        console.error('Erro ao criar receita:', error);
+        res.status(500).json({ error: 'Erro ao criar receita.' });
+    }
+};
+
+module.exports = { getAllReceitas, getReceitasFavoritas, getReceitaById, deleteReceita, updateReceita, createReceita };

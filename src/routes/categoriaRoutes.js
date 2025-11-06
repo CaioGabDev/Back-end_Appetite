@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const personagemController = require('../controllers/categoriaController.js');
+const categoriaController = require('../controllers/categoriaController.js');
 
-router.get('/personagens/', personagemController.getAllPersonagens);
-router.get('/personagens/:id', personagemController.getPersonagemById);
-router.post('/personagens/', personagemController.createPersonagem);
-router.put('/personagens/:id', personagemController.updatePersonagem);
-router.delete('/personagens/:id', personagemController.deletePersonagem);
+router.get('/categorias', categoriaController.getAllCategorias);
+router.get('/categorias/:id', categoriaController.getCategoriaById);
+router.post('/categorias', categoriaController.createCategoria);
+router.put('/categorias/:id', categoriaController.updateCategoria);
+router.delete('/categorias/:id', categoriaController.deleteCategoria);
 
 module.exports = router;

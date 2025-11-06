@@ -1,60 +1,79 @@
-const PersonagemModel = require('../models/CategoriaModel');
+const CategoriaModel = require('../models/CategoriaModel');
 
-const getAllPersonagens = async (req, res) => {
+const getAllCategorias = async (req, res) => {
     try {
-        const personagens = await PersonagemModel.getPersonagens();
-        res.json(personagens);
+        const categorias = await CategoriaModel.getCategorias();
+        res.json(categorias);
     } catch (error) {
-        console.error('Erro ao buscar personagens:', error);
-        res.status(500).json({ error: 'Erro ao buscar personagens.' });
+        console.error('Erro ao buscar categorias:', error);
+        res.status(500).json({ error: 'Erro ao buscar categorias.' });
     }
 };
 
-const getPersonagemById = async (req, res) => {
+const getCategoriaById = async (req, res) => {
     try {
-        const personagem = await PersonagemModel.getPersonagemById(req.params.id);
-        if (!personagem) {
-            return res.status(404).json({ error: 'Personagem não encontrado.' });
+        const categoria = await CategoriaModel.getCategoriaById(req.params.id);
+        if (!categoria) {
+            return res.status(404).json({ error: 'Categoria não encontrada.' });
         }
-        res.json(personagem);
+        res.json(categoria);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar personagem.' });
+        console.error('Erro ao buscar categoria:', error);
+        res.status(500).json({ error: 'Erro ao buscar categoria.' });
     }
 };
 
-const createPersonagem = async (req, res) => {
+const deleteCategoria = async (req, res) => {
     try {
-        const { nome, descricao, imagem_url, filmes, curiosidades } = req.body;
-        const newPersonagem = await PersonagemModel.createPersonagem(nome, descricao, imagem_url, filmes, curiosidades);
-        res.status(201).json(newPersonagem);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao criar personagem.' });
-    }
-};
-
-const updatePersonagem = async (req, res) => {
-    try {
-        const { nome, descricao, imagem_url, filmes, curiosidades } = req.body;
-        const personagem = await PersonagemModel.updatePersonagem(req.params.id, nome, descricao, imagem_url, filmes, curiosidades);
-        if (!personagem) {
-            return res.status(404).json({ error: 'Personagem não encontrado.' });
+        const result = await CategoriaModel.deleteCategoria(req.params.id);
+        if (!result) {
+            return res.status(404).json({ error: 'Categoria não encontrada.' });
         }
-        res.json(personagem);
+        res.json({ message: 'Categoria deletada com sucesso.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao editar personagem.' });
+        console.error('Erro ao deletar categoria:', error);
+        res.status(500).json({ error: 'Erro ao deletar categoria.' });
     }
 };
 
-const deletePersonagem = async (req, res) => {
+const updateCategoria = async (req, res) => {
     try {
-        const result = await PersonagemModel.deletePersonagem(req.params.id);
-        if (result.error) {
-            return res.status(404).json(result);
+        const { nome } = req.body;
+        
+
+        if (!nome) {
+            return res.status(400).json({ 
+                error: 'Nome é obrigatório.' 
+            });
         }
-        res.json(result);
+
+        const categoria = await CategoriaModel.updateCategoria(req.params.id, nome);
+        if (!categoria) {
+            return res.status(404).json({ error: 'Categoria não encontrada.' });
+        }
+        res.json(categoria);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao deletar personagem.' });
+        console.error('Erro ao atualizar categoria:', error);
+        res.status(500).json({ error: 'Erro ao atualizar categoria.' });
     }
 };
 
-module.exports = { getAllPersonagens, getPersonagemById, createPersonagem, updatePersonagem, deletePersonagem };
+const createCategoria = async (req, res) => {
+    try {
+        const { nome } = req.body;
+
+        if (!nome) {
+            return res.status(400).json({ 
+                error: 'Nome é obrigatório.' 
+            });
+        }
+
+        const categoria = await CategoriaModel.createCategoria(nome);
+        res.status(201).json(categoria);
+    } catch (error) {
+        console.error('Erro ao criar categoria:', error);
+        res.status(500).json({ error: 'Erro ao criar categoria.' });
+    }
+};
+
+module.exports = { getAllCategorias, getCategoriaById, deleteCategoria, updateCategoria, createCategoria };
