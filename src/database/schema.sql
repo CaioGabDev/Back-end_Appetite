@@ -2,6 +2,12 @@ CREATE DATABASE appetitedb;
 
 \c appetitedb;
 
+-- Tabela: categorias
+CREATE TABLE categorias (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL
+);
+
 -- Tabela: receitas
 CREATE TABLE receitas (
   id SERIAL PRIMARY KEY,
@@ -13,14 +19,10 @@ CREATE TABLE receitas (
   favorita BOOLEAN DEFAULT FALSE,
   avaliacao INTEGER CHECK (avaliacao >= 1 AND avaliacao <= 5),  -- Avaliação de 1 a 5
   tempo_preparo INTEGER,  -- Tempo de preparo em minutos
-  dificuldade VARCHAR(30) CHECK (dificuldade IN ('FÁCIL', 'MÉDIO', 'DIFÍCIL')) NOT NULL,
-  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Tabela: categorias
-CREATE TABLE categorias (
-  id SERIAL PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL
+  dificuldade VARCHAR(30) CHECK (dificuldade IN ('FACIL', 'MEDIO', 'DIFICIL')) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,  -- Relacionamento direto com categorias
+  UNIQUE (titulo)  -- Garantir que o título da receita seja único
 );
 
 -- Tabela: receita_categorias (Relacionamento N:N)
