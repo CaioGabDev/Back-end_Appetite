@@ -31,3 +31,5 @@ CREATE TABLE receita_categorias (
   categoria_id INTEGER REFERENCES categorias(id) ON DELETE CASCADE,
   PRIMARY KEY (receita_id, categoria_id)
 );
+
+--Não pode ter acentos nos nomes das categorias
