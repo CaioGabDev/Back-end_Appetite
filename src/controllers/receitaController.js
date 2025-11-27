@@ -1,6 +1,6 @@
 const ReceitaModel = require('../models/ReceitaModel');
 
-const validDificuldades = ['FÁCIL', 'MÉDIO', 'DIFÍCIL'];
+const validDificuldades = ['FACIL', 'MEDIO', 'DIFICIL'];
 
 const getAllReceitas = async (req, res) => {
     try {
@@ -143,7 +143,7 @@ const createReceita = async (req, res) => {
         let avaliacaoFinal = null;
         if (avaliacao !== undefined) {
             const av = parseInt(avaliacao, 10);
-            if (isNaN(av) || av < 1 || av > 5) {
+            if (isNaN(av) || av < 1 || av < 5) {
                 return res.status(400).json({ 
                     error: 'Avaliação deve ser inteiro entre 1 e 5.' 
                 });
@@ -173,4 +173,43 @@ const createReceita = async (req, res) => {
     }
 };
 
-module.exports = { getAllReceitas, getReceitasFavoritas, getReceitaById, deleteReceita, updateReceita, createReceita };
+const toggleFavorita = async (req, res) => {
+    try {
+        const receita = await ReceitaModel.getReceitaById(req.params.id);
+        
+        if (!receita) {
+            return res.status(404).json({ error: 'Receita não encontrada.' });
+        }
+
+        // Alterna o valor de favorita
+        const novoValorFavorita = !receita.favorita;
+        
+        const receitaAtualizada = await ReceitaModel.updateReceita(
+            req.params.id,
+            receita.titulo,
+            receita.descricao,
+            receita.ingredientes,
+            receita.modo_preparo,
+            receita.imagem,
+            novoValorFavorita,
+            receita.avaliacao,
+            receita.tempo_preparo,
+            receita.dificuldade
+        );
+
+        res.json(receitaAtualizada);
+    } catch (error) {
+        console.error('Erro ao alternar favorita:', error);
+        res.status(500).json({ error: 'Erro ao alternar favorita.' });
+    }
+};
+
+module.exports = { 
+    getAllReceitas, 
+    getReceitasFavoritas, 
+    getReceitaById, 
+    deleteReceita, 
+    updateReceita, 
+    createReceita,
+    toggleFavorita
+};
