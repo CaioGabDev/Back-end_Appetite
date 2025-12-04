@@ -27,14 +27,12 @@ Este é um projeto backend que gerencia um banco de dados de receitas com funcio
 4. **Configure as variáveis de ambiente**
    - Crie um arquivo `.env` na raiz do projeto
    - Adicione as seguintes variáveis:
-     ```env
     PORT=3000
     DB_USER=postgres
     DB_HOST=localhost
     DB_NAME=appetitedb
     DB_PASSWORD=amods
     DB_PORT=7777
-     ```
 
 ## 🏃‍♂️ Como Executar
 
