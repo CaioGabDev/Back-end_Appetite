@@ -1,4 +1,5 @@
 const CategoriaModel = require('../models/CategoriaModel');
+const ReceitaModel = require('../models/ReceitaModel');
 
 const getAllCategorias = async (req, res) => {
     try {
@@ -39,7 +40,6 @@ const deleteCategoria = async (req, res) => {
 const updateCategoria = async (req, res) => {
     try {
         const { nome } = req.body;
-        
 
         if (!nome) {
             return res.status(400).json({ 
@@ -76,4 +76,36 @@ const createCategoria = async (req, res) => {
     }
 };
 
-module.exports = { getAllCategorias, getCategoriaById, deleteCategoria, updateCategoria, createCategoria };
+const getAllReceitas = async (req, res) => {
+    try {
+        const { categoria } = req.query;
+        
+        let receitas;
+        
+        if (categoria) {
+            // Buscar receitas por categoria
+            receitas = await ReceitaModel.getReceitasByCategoria(categoria);
+        } else {
+            // Buscar todas as receitas
+            receitas = await ReceitaModel.getReceitas();
+        }
+        
+        res.json(receitas);
+    } catch (error) {
+        console.error('Erro ao buscar receitas:', error);
+        res.status(500).json({ error: 'Erro ao buscar receitas.' });
+    }
+};
+
+const getReceitasByCategoria = async (req, res) => {
+    try {
+        const { categoria } = req.params;
+        const receitas = await ReceitaModel.getReceitasByCategoria(categoria);
+        res.json(receitas);
+    } catch (error) {
+        console.error('Erro ao buscar receitas por categoria:', error);
+        res.status(500).json({ error: 'Erro ao buscar receitas por categoria.' });
+    }
+};
+
+module.exports = { getAllCategorias, getCategoriaById, deleteCategoria, updateCategoria, createCategoria, getAllReceitas, getReceitasByCategoria };

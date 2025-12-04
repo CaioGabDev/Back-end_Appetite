@@ -42,10 +42,38 @@ const deleteCategoria = async (id) => {
     return result.rowCount > 0;
 };
 
+const getReceitasByCategoria = async (nomeCategoria) => {
+    const result = await pool.query(`
+        SELECT r.*, c.nome as categoria_nome 
+        FROM receitas r 
+        LEFT JOIN categorias c ON r.categoria_id = c.id 
+        WHERE c.nome = $1 
+        ORDER BY r.data_criacao DESC
+    `, [nomeCategoria]);
+    return result.rows;
+};
+
+const getReceitas = async () => {
+    const result = await pool.query(`
+        SELECT r.*, c.nome as categoria_nome 
+        FROM receitas r 
+        LEFT JOIN categorias c ON r.categoria_id = c.id 
+        ORDER BY r.data_criacao DESC
+    `);
+    return result.rows;
+};
+
 module.exports = { 
     getCategorias, 
     getCategoriaById, 
     createCategoria, 
     updateCategoria, 
-    deleteCategoria 
+    deleteCategoria, 
+    getReceitas, 
+    getReceitasByCategoria, 
+    getReceitasFavoritas,
+    getReceitaById, 
+    createReceita, 
+    updateReceita, 
+    deleteReceita 
 };

@@ -32,8 +32,9 @@ const createReceita = async (receita) => {
             favorita, 
             avaliacao, 
             tempo_preparo, 
-            dificuldade
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
+            dificuldade,
+            categoria_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
     `, [
         receita.titulo, 
         receita.descricao, 
@@ -43,7 +44,8 @@ const createReceita = async (receita) => {
         receita.favorita, 
         receita.avaliacao, 
         receita.tempo_preparo, 
-        receita.dificuldade
+        receita.dificuldade,
+        receita.categoria_id
     ]);
     
     return result.rows[0];
