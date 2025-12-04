@@ -1,6 +1,6 @@
-# Backend CarrosDB
+# Backend AppetiteDB
 
-Este é um projeto backend que gerencia um banco de dados de carros com funcionalidades para personagens e favoritos.
+Este é um projeto backend que gerencia um banco de dados de receitas com funcionalidades para usuários.
 
 ## 🛠️ Pré-requisitos
 
@@ -12,8 +12,8 @@ Este é um projeto backend que gerencia um banco de dados de carros com funciona
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/CaioGabDev/atividade-backend-carrosdb.git
-   cd atividade-backend-carrosdb
+   git clone https://github.com/CaioGabDev/Back-end_Appetite
+   cd Back-end_Appetite
    ```
 
 2. **Instale as dependências**
@@ -31,7 +31,7 @@ Este é um projeto backend que gerencia um banco de dados de carros com funciona
     PORT=3000
     DB_USER=postgres
     DB_HOST=localhost
-    DB_NAME=carrosdb
+    DB_NAME=appetitedb
     DB_PASSWORD=amods
     DB_PORT=7777
      ```
@@ -46,32 +46,43 @@ Este é um projeto backend que gerencia um banco de dados de carros com funciona
 
 ## 📚 Endpoints da API
 
-### Personagens
-- `GET /personagens` - Lista todos os personagens
-- `GET /personagens/:id` - Obtém um personagem específico
-- `POST /personagens` - Cria um novo personagem
-- `PUT /personagens/:id` - Atualiza um personagem
-- `DELETE /personagens/:id` - Remove um personagem
+### Categorias
+- `GET /categorias` - Lista todos os personagens
+- `GET /categorias/:id` - Obtém um personagem específico
+- `POST /categorias` - Cria um novo personagem
+- `PUT /categorias/:id` - Atualiza um personagem
+- `DELETE /categorias/:id` - Remove um personagem
 
-### Favoritos
-- `GET /favoritos` - Lista todos os favoritos
-- `GET /favoritos/:id` - Obtém um favorito específico
-- `POST /favoritos` - Adiciona um novo favorito
-- `DELETE /favoritos/:id` - Remove um favorito
+### Receitas
+- `GET /receitas` - Lista todos os favoritos
+- `GET /receitas/:id` - Obtém um favorito específico
+- `POST /receitas` - Adiciona um novo favorito
+- `DELETE /receitas/:id` - Remove um favorito
 
 ## 🗄️ Estrutura do Banco de Dados
 
 O banco de dados possui duas tabelas principais:
 
-1. **Personagens**
-   - id (SERIAL PRIMARY KEY)
-   - nome (VARCHAR)
-   - descricao (TEXT)
-   - imagem (VARCHAR)
+1. **Categorias**
+  - id SERIAL PRIMARY KEY,
+  - nome VARCHAR(100) NOT NULL
 
-2. **Favoritos**
-   - id (SERIAL PRIMARY KEY)
-   - personagem_id (INTEGER - Foreign Key referenciando Personagens)
+
+2. **Receitas**
+   - id SERIAL PRIMARY KEY,
+   - titulo VARCHAR(255) NOT NULL,
+   - descricao TEXT,
+   - ingredientes TEXT,
+   - modo_preparo TEXT,
+   - imagem TEXT,
+   - favorita BOOLEAN DEFAULT FALSE,
+   - avaliacao INTEGER CHECK (avaliacao >= 1 AND avaliacao <= 5),  -- Avaliação de 1 a 5
+   - tempo_preparo INTEGER,  -- Tempo de preparo em minutos
+   - dificuldade VARCHAR(30) CHECK (dificuldade IN ('FACIL', 'MEDIO', 'DIFICIL')) NOT NULL,
+   - data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   - categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,  -- Relacionamento direto com categorias
+   - UNIQUE (titulo)  -- Garantir que o título da receita seja único
+
 
 ## 🔧 Tecnologias Utilizadas
 
@@ -87,4 +98,4 @@ O banco de dados possui duas tabelas principais:
 
 ## 🤝 Contribuindo
 
-1. Deixa uma estrelinha no repositório do Titio ai 😉😉😉
+1. Deixa uma estrelinha no repositório 😉😉😉
