@@ -1,79 +1,79 @@
 const pool = require("../config/database");
 
+// GET - Todas as categorias
 const getCategorias = async () => {
-    const result = await pool.query(`
-        SELECT * FROM categorias ORDER BY nome ASC
-    `);
+  try {
+    const result = await pool.query(
+      'SELECT * FROM categorias ORDER BY nome ASC'
+    );
     return result.rows;
+  } catch (error) {
+    console.error('❌ Erro ao buscar categorias:', error.message);
+    throw error;
+  }
 };
 
+// GET - Categoria por ID
 const getCategoriaById = async (id) => {
-    const result = await pool.query(`
-        SELECT * FROM categorias WHERE id = $1
-    `, [id]);
+  try {
+    const result = await pool.query(
+      'SELECT * FROM categorias WHERE id = $1',
+      [id]
+    );
     return result.rows[0];
+  } catch (error) {
+    console.error('❌ Erro ao buscar categoria:', error.message);
+    throw error;
+  }
 };
 
+// POST - Criar categoria
 const createCategoria = async (nome) => {
-    const result = await pool.query(`
-        INSERT INTO categorias (nome) 
-        VALUES ($1) RETURNING *
-    `, [nome]);
-    
+  try {
+    const result = await pool.query(
+      'INSERT INTO categorias (nome) VALUES ($1) RETURNING *',
+      [nome]
+    );
     return result.rows[0];
+  } catch (error) {
+    console.error('❌ Erro ao criar categoria:', error.message);
+    throw error;
+  }
 };
 
+// PUT - Atualizar categoria
 const updateCategoria = async (id, nome) => {
-    const result = await pool.query(`
-        UPDATE categorias 
-        SET nome = $1 
-        WHERE id = $2 
-        RETURNING *
-    `, [nome, id]);
-    
-    return result.rows[0] || null;
+  try {
+    const result = await pool.query(
+      'UPDATE categorias SET nome = $1 WHERE id = $2 RETURNING *',
+      [nome, id]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('❌ Erro ao atualizar categoria:', error.message);
+    throw error;
+  }
 };
 
+// DELETE - Deletar categoria
 const deleteCategoria = async (id) => {
-    const result = await pool.query(`
-        DELETE FROM categorias WHERE id = $1 RETURNING *
-    `, [id]);
-    
-    return result.rowCount > 0;
+  try {
+    const result = await pool.query(
+      'DELETE FROM categorias WHERE id = $1 RETURNING id',
+      [id]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('❌ Erro ao deletar categoria:', error.message);
+    throw error;
+  }
 };
 
-const getReceitasByCategoria = async (nomeCategoria) => {
-    const result = await pool.query(`
-        SELECT r.*, c.nome as categoria_nome 
-        FROM receitas r 
-        LEFT JOIN categorias c ON r.categoria_id = c.id 
-        WHERE c.nome = $1 
-        ORDER BY r.data_criacao DESC
-    `, [nomeCategoria]);
-    return result.rows;
-};
-
-const getReceitas = async () => {
-    const result = await pool.query(`
-        SELECT r.*, c.nome as categoria_nome 
-        FROM receitas r 
-        LEFT JOIN categorias c ON r.categoria_id = c.id 
-        ORDER BY r.data_criacao DESC
-    `);
-    return result.rows;
-};
-
-module.exports = { 
-    getCategorias, 
-    getCategoriaById, 
-    createCategoria, 
-    updateCategoria, 
-    deleteCategoria, 
-    getReceitas, 
-    getReceitasByCategoria, 
-    getReceitasFavoritas,
-    getReceitaById, 
-    createReceita, 
-    updateReceita, 
-    deleteReceita 
+// ✅ APENAS EXPORTE O QUE EXISTE NESTE ARQUIVO
+module.exports = {
+  getCategorias,
+  getCategoriaById,
+  createCategoria,
+  updateCategoria,
+  deleteCategoria
 };

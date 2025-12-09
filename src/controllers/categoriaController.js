@@ -1,111 +1,119 @@
 const CategoriaModel = require('../models/CategoriaModel');
-const ReceitaModel = require('../models/ReceitaModel');
 
-const getAllCategorias = async (req, res) => {
-    try {
-        const categorias = await CategoriaModel.getCategorias();
-        res.json(categorias);
-    } catch (error) {
-        console.error('Erro ao buscar categorias:', error);
-        res.status(500).json({ error: 'Erro ao buscar categorias.' });
-    }
+// GET - Todas as categorias
+const getCategorias = async (req, res) => {
+  try {
+    console.log('🔍 Buscando todas as categorias');
+    const categorias = await CategoriaModel.getCategorias();
+    console.log(`✅ ${categorias.length} categorias encontradas`);
+    res.json(categorias);
+  } catch (error) {
+    console.error('❌ Erro ao buscar categorias:', error.message);
+    res.status(500).json({ error: 'Erro ao buscar categorias' });
+  }
 };
 
+// GET - Categoria por ID
 const getCategoriaById = async (req, res) => {
-    try {
-        const categoria = await CategoriaModel.getCategoriaById(req.params.id);
-        if (!categoria) {
-            return res.status(404).json({ error: 'Categoria não encontrada.' });
-        }
-        res.json(categoria);
-    } catch (error) {
-        console.error('Erro ao buscar categoria:', error);
-        res.status(500).json({ error: 'Erro ao buscar categoria.' });
+  try {
+    const { id } = req.params;
+    console.log('🔍 Buscando categoria ID:', id);
+    const categoria = await CategoriaModel.getCategoriaById(id);
+    
+    if (!categoria) {
+      console.log('❌ Categoria não encontrada');
+      return res.status(404).json({ error: 'Categoria não encontrada' });
     }
+    
+    console.log('✅ Categoria encontrada:', categoria.nome);
+    res.json(categoria);
+  } catch (error) {
+    console.error('❌ Erro ao buscar categoria:', error.message);
+    res.status(500).json({ error: 'Erro ao buscar categoria' });
+  }
 };
 
-const deleteCategoria = async (req, res) => {
-    try {
-        const result = await CategoriaModel.deleteCategoria(req.params.id);
-        if (!result) {
-            return res.status(404).json({ error: 'Categoria não encontrada.' });
-        }
-        res.json({ message: 'Categoria deletada com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao deletar categoria:', error);
-        res.status(500).json({ error: 'Erro ao deletar categoria.' });
-    }
-};
-
-const updateCategoria = async (req, res) => {
-    try {
-        const { nome } = req.body;
-
-        if (!nome) {
-            return res.status(400).json({ 
-                error: 'Nome é obrigatório.' 
-            });
-        }
-
-        const categoria = await CategoriaModel.updateCategoria(req.params.id, nome);
-        if (!categoria) {
-            return res.status(404).json({ error: 'Categoria não encontrada.' });
-        }
-        res.json(categoria);
-    } catch (error) {
-        console.error('Erro ao atualizar categoria:', error);
-        res.status(500).json({ error: 'Erro ao atualizar categoria.' });
-    }
-};
-
+// POST - Criar categoria
 const createCategoria = async (req, res) => {
-    try {
-        const { nome } = req.body;
-
-        if (!nome) {
-            return res.status(400).json({ 
-                error: 'Nome é obrigatório.' 
-            });
-        }
-
-        const categoria = await CategoriaModel.createCategoria(nome);
-        res.status(201).json(categoria);
-    } catch (error) {
-        console.error('Erro ao criar categoria:', error);
-        res.status(500).json({ error: 'Erro ao criar categoria.' });
+  try {
+    const { nome } = req.body;
+    
+    console.log('\n✏️ CRIANDO NOVA CATEGORIA:', nome);
+    
+    if (!nome) {
+      return res.status(400).json({ error: 'Nome da categoria é obrigatório' });
     }
+
+    const resultado = await CategoriaModel.createCategoria(nome);
+    
+    console.log('✅ Categoria criada com sucesso! ID:', resultado.id);
+    res.status(201).json({ 
+      message: 'Categoria criada com sucesso',
+      categoria: resultado
+    });
+  } catch (error) {
+    console.error('❌ ERRO ao criar categoria:', error.message);
+    res.status(500).json({ 
+      error: 'Erro ao criar categoria',
+      details: error.message 
+    });
+  }
 };
 
-const getAllReceitas = async (req, res) => {
-    try {
-        const { categoria } = req.query;
-        
-        let receitas;
-        
-        if (categoria) {
-            // Buscar receitas por categoria
-            receitas = await ReceitaModel.getReceitasByCategoria(categoria);
-        } else {
-            // Buscar todas as receitas
-            receitas = await ReceitaModel.getReceitas();
-        }
-        
-        res.json(receitas);
-    } catch (error) {
-        console.error('Erro ao buscar receitas:', error);
-        res.status(500).json({ error: 'Erro ao buscar receitas.' });
+// PUT - Atualizar categoria
+const updateCategoria = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome } = req.body;
+    
+    console.log('🔄 Atualizando categoria ID:', id);
+    
+    if (!nome) {
+      return res.status(400).json({ error: 'Nome da categoria é obrigatório' });
     }
+
+    const resultado = await CategoriaModel.updateCategoria(id, nome);
+    
+    if (!resultado) {
+      return res.status(404).json({ error: 'Categoria não encontrada' });
+    }
+    
+    console.log('✅ Categoria atualizada:', resultado.nome);
+    res.json({
+      message: 'Categoria atualizada com sucesso',
+      categoria: resultado
+    });
+  } catch (error) {
+    console.error('❌ Erro ao atualizar categoria:', error.message);
+    res.status(500).json({ error: 'Erro ao atualizar categoria' });
+  }
 };
 
-const getReceitasByCategoria = async (req, res) => {
-    try {
-        const { categoria } = req.params;
-        const receitas = await ReceitaModel.getReceitasByCategoria(categoria);
-        res.json(receitas);
-    } catch (error) {
-        console.error('Erro ao buscar receitas por categoria:', error);
-        res.status(500).json({ error: 'Erro ao buscar receitas por categoria.' });
+// DELETE - Deletar categoria
+const deleteCategoria = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('🗑️ Deletando categoria ID:', id);
+    
+    const resultado = await CategoriaModel.deleteCategoria(id);
+    
+    if (!resultado) {
+      return res.status(404).json({ error: 'Categoria não encontrada' });
     }
+    
+    console.log('✅ Categoria deletada com sucesso');
+    res.json({ message: 'Categoria deletada com sucesso' });
+  } catch (error) {
+    console.error('❌ Erro ao deletar categoria:', error.message);
+    res.status(500).json({ error: 'Erro ao deletar categoria' });
+  }
 };
 
-module.exports = { getAllCategorias, getCategoriaById, deleteCategoria, updateCategoria, createCategoria, getAllReceitas, getReceitasByCategoria };
+// ✅ Exportar TODAS as funções
+module.exports = {
+  getCategorias,
+  getCategoriaById,
+  createCategoria,
+  updateCategoria,
+  deleteCategoria
+};
