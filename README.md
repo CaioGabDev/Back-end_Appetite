@@ -27,12 +27,14 @@ Este é um projeto backend que gerencia um banco de dados de receitas com funcio
 4. **Configure as variáveis de ambiente**
    - Crie um arquivo `.env` na raiz do projeto
    - Adicione as seguintes variáveis:
-    PORT=3000
-    DB_USER=postgres
-    DB_HOST=localhost
-    DB_NAME=appetitedb
-    DB_PASSWORD=amods
-    DB_PORT=7777
+   ```env
+   PORT=3000
+   DB_USER=postgres
+   DB_HOST=localhost
+   DB_NAME=appetitedb
+   DB_PASSWORD=amods
+   DB_PORT=7777
+   ```
 
 ## 🏃‍♂️ Como Executar
 
@@ -45,42 +47,203 @@ Este é um projeto backend que gerencia um banco de dados de receitas com funcio
 ## 📚 Endpoints da API
 
 ### Categorias
-- `GET /categorias` - Lista todos os personagens
-- `GET /categorias/:id` - Obtém um personagem específico
-- `POST /categorias` - Cria um novo personagem
-- `PUT /categorias/:id` - Atualiza um personagem
-- `DELETE /categorias/:id` - Remove um personagem
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/categorias` | Lista todas as categorias |
+| `GET` | `/categorias/:id` | Obtém uma categoria específica |
+| `POST` | `/categorias` | Cria uma nova categoria |
+| `PUT` | `/categorias/:id` | Atualiza uma categoria |
+| `DELETE` | `/categorias/:id` | Remove uma categoria |
+
+#### Exemplos de uso:
+
+**POST /categorias** - Criar categoria
+```json
+{
+  "nome": "Sobremesas"
+}
+```
+
+**PUT /categorias/:id** - Atualizar categoria
+```json
+{
+  "nome": "Sobremesas Geladas"
+}
+```
+
+---
 
 ### Receitas
-- `GET /receitas` - Lista todos os favoritos
-- `GET /receitas/:id` - Obtém um favorito específico
-- `POST /receitas` - Adiciona um novo favorito
-- `DELETE /receitas/:id` - Remove um favorito
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/receitas` | Lista todas as receitas |
+| `GET` | `/receitas/:id` | Obtém uma receita específica |
+| `GET` | `/receitas/favoritas/all` | Lista todas as receitas favoritas |
+| `POST` | `/receitas` | Adiciona uma nova receita |
+| `PUT` | `/receitas/:id` | Atualiza uma receita |
+| `PUT` | `/receitas/:id/favorita` | Alterna status de favorita |
+| `PUT` | `/receitas/:id/avaliacao` | Atualiza avaliação da receita |
+| `DELETE` | `/receitas/:id` | Remove uma receita |
+
+#### Exemplos de uso:
+
+**POST /receitas** - Criar receita
+```json
+{
+  "titulo": "Bolo de Chocolate",
+  "descricao": "Um delicioso bolo de chocolate fofinho",
+  "ingredientes": "2 xícaras de farinha, 1 xícara de açúcar, 3 ovos, 1 xícara de chocolate em pó",
+  "modo_preparo": "Misture todos os ingredientes e leve ao forno por 40 minutos",
+  "imagem": "https://exemplo.com/bolo.jpg",
+  "favorita": false,
+  "avaliacao": 5,
+  "tempo_preparo": 60,
+  "dificuldade": "MEDIO",
+  "categoria_id": 1
+}
+```
+
+**PUT /receitas/:id** - Atualizar receita
+```json
+{
+  "titulo": "Bolo de Chocolate Premium",
+  "descricao": "Um delicioso bolo de chocolate fofinho com cobertura",
+  "ingredientes": "2 xícaras de farinha, 1 xícara de açúcar, 3 ovos, 1 xícara de chocolate em pó, ganache",
+  "modo_preparo": "Misture todos os ingredientes e leve ao forno por 40 minutos. Cubra com ganache.",
+  "imagem": "https://exemplo.com/bolo-premium.jpg",
+  "favorita": true,
+  "avaliacao": 5,
+  "tempo_preparo": 75,
+  "dificuldade": "DIFICIL",
+  "categoria_id": 1
+}
+```
+
+**DELETE /receitas/:id** - Deletar receita
+```bash
+# Exemplo usando curl
+curl -X DELETE http://localhost:3000/api/receitas/1
+```
+
+**Resposta de sucesso (200):**
+```json
+{
+  "message": "Receita deletada com sucesso",
+  "id": 1
+}
+```
+
+**Resposta de erro (404):**
+```json
+{
+  "error": "Receita não encontrada"
+}
+```
+
+---
+
+**PUT /receitas/:id/favorita** - Alternar favorita
+```json
+{
+  "favorita": true
+}
+```
+
+**Resposta:**
+```json
+{
+  "message": "❤️ Receita favoritada!",
+  "receita": { ... }
+}
+```
+
+---
+
+**PUT /receitas/:id/avaliacao** - Atualizar avaliação
+```json
+{
+  "avaliacao": 5
+}
+```
+
+**Resposta:**
+```json
+{
+  "message": "⭐ Receita avaliada com 5 estrelas!",
+  "receita": { ... }
+}
+```
+
+#### Campos da Receita:
+
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `titulo` | string | Sim | Título único da receita (máx. 255 caracteres) |
+| `descricao` | string | Não | Descrição detalhada da receita |
+| `ingredientes` | string | Não | Lista de ingredientes |
+| `modo_preparo` | string | Não | Instruções de preparo |
+| `imagem` | string | Não | URL da imagem da receita |
+| `favorita` | boolean | Não | Se a receita é favorita (padrão: false) |
+| `avaliacao` | integer | Não | Avaliação de 1 a 5 |
+| `tempo_preparo` | integer | Não | Tempo de preparo em minutos |
+| `dificuldade` | string | Sim | Nível de dificuldade: `FACIL`, `MEDIO` ou `DIFICIL` |
+| `categoria_id` | integer | Não | ID da categoria relacionada |
 
 ## 🗄️ Estrutura do Banco de Dados
 
 O banco de dados possui duas tabelas principais:
 
-1. **Categorias**
-  - id SERIAL PRIMARY KEY,
-  - nome VARCHAR(100) NOT NULL
+### Tabela: Categorias
 
+```sql
+CREATE TABLE categorias (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL
+);
+```
 
-2. **Receitas**
-   - id SERIAL PRIMARY KEY,
-   - titulo VARCHAR(255) NOT NULL,
-   - descricao TEXT,
-   - ingredientes TEXT,
-   - modo_preparo TEXT,
-   - imagem TEXT,
-   - favorita BOOLEAN DEFAULT FALSE,
-   - avaliacao INTEGER CHECK (avaliacao >= 1 AND avaliacao <= 5),  -- Avaliação de 1 a 5
-   - tempo_preparo INTEGER,  -- Tempo de preparo em minutos
-   - dificuldade VARCHAR(30) CHECK (dificuldade IN ('FACIL', 'MEDIO', 'DIFICIL')) NOT NULL,
-   - data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   - categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,  -- Relacionamento direto com categorias
-   - UNIQUE (titulo)  -- Garantir que o título da receita seja único
+### Tabela: Receitas
 
+```sql
+CREATE TABLE receitas (
+  id SERIAL PRIMARY KEY,
+  titulo VARCHAR(255) NOT NULL,
+  descricao TEXT,
+  ingredientes TEXT,
+  modo_preparo TEXT,
+  imagem TEXT,
+  favorita BOOLEAN DEFAULT FALSE,
+  avaliacao INTEGER CHECK (avaliacao >= 1 AND avaliacao <= 5),
+  tempo_preparo INTEGER,
+  dificuldade VARCHAR(30) CHECK (dificuldade IN ('FACIL', 'MEDIO', 'DIFICIL')) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
+  UNIQUE (titulo)
+);
+```
+
+### Diagrama de Relacionamento
+
+```
+┌─────────────────┐       ┌─────────────────────┐
+│   CATEGORIAS    │       │      RECEITAS       │
+├─────────────────┤       ├─────────────────────┤
+│ id (PK)         │◄──────│ categoria_id (FK)   │
+│ nome            │       │ id (PK)             │
+└─────────────────┘       │ titulo (UNIQUE)     │
+                          │ descricao           │
+                          │ ingredientes        │
+                          │ modo_preparo        │
+                          │ imagem              │
+                          │ favorita            │
+                          │ avaliacao           │
+                          │ tempo_preparo       │
+                          │ dificuldade         │
+                          │ data_criacao        │
+                          └─────────────────────┘
+```
 
 ## 🔧 Tecnologias Utilizadas
 
@@ -91,8 +254,10 @@ O banco de dados possui duas tabelas principais:
 
 ## 📝 Comandos Úteis
 
-- Iniciar o servidor: `npm start`
-- Executar em modo desenvolvimento: `npm run dev`
+| Comando | Descrição |
+|---------|-----------|
+| `npm start` | Iniciar o servidor |
+| `npm run dev` | Executar em modo desenvolvimento |
 
 ## 🤝 Contribuindo
 
